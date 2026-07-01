@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--
+      OpenTelemetry 1.12.0 — all packages must share the same version.
+      Mismatched OTel versions cause runtime assembly binding failures on Windows.
+    -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting"             Version="1.12.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"     Version="1.12.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http"           Version="1.12.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime"        Version="1.12.0" />
+
+    <!--
+      Azure Monitor OTel Distro — the Microsoft-native Application Insights exporter.
+      Post 1: configured with empty connection string (activates in Post 2).
+      Production: replace empty string with real Azure Monitor connection string.
+      Zero code changes required — only appsettings.json changes.
+    -->
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore"       Version="1.3.0" />
+
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.28" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience"           Version="8.10.0" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery"          Version="9.5.2" />
+  </ItemGroup>
+</Project>

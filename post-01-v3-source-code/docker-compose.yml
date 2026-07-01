@@ -1,0 +1,94 @@
+version: "3.9"
+
+# Hyperscale Log Monitoring — docker-compose.yml
+# Post 1 of 45 · post/01-aspire-sandbox
+# Secondary orchestration (use .NET Aspire AppHost as primary)
+#
+# Use Docker Compose when:
+#   - Running in CI without .NET SDK (GitHub Actions, Azure DevOps)
+#   - Deploying to non-Aspire environments
+#   - Demonstrating the open-source secondary track in isolation
+#
+# Memory budget:
+#   Windows 11 + VS Code + Docker Desktop + browser:  6.0 GB
+#   user-service:                                      0.25 GB (mem_limit: 256m)
+#   order-service:                                     0.25 GB (mem_limit: 256m)
+#   otel-collector:                                    0.30 GB (mem_limit: 300m)
+#   TOTAL:                                             6.80 GB (17.2 GB headroom)
+
+services:
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.102.0
+    container_name: otel-collector
+    mem_limit: 300m
+    restart: unless-stopped
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "55679:55679"  # zPages UI
+    healthcheck:
+      test: ["CMD", "/otelcol-contrib", "validate", "--config=/etc/otelcol-contrib/config.yaml"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - telemetry
+
+  user-service:
+    build:
+      context: ./src
+      dockerfile: UserService/Dockerfile
+    container_name: user-service
+    mem_limit: 256m
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Docker Compose: set OTLP endpoint manually (Aspire sets this automatically)
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=user-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      otel-collector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - telemetry
+
+  order-service:
+    build:
+      context: ./src
+      dockerfile: OrderService/Dockerfile
+    container_name: order-service
+    mem_limit: 256m
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=order-service
+    ports:
+      - "8081:8080"
+    depends_on:
+      otel-collector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - telemetry
+
+networks:
+  telemetry:
+    driver: bridge
