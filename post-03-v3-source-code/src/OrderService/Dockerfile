@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["OrderService/OrderService.csproj",         "OrderService/"]
+COPY ["ServiceDefaults/ServiceDefaults.csproj",   "ServiceDefaults/"]
+RUN dotnet restore "OrderService/OrderService.csproj"
+COPY OrderService/     OrderService/
+COPY ServiceDefaults/  ServiceDefaults/
+WORKDIR "/src/OrderService"
+RUN dotnet publish -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=5 \
+  CMD curl -f http://localhost:8080/health || exit 1
+ENTRYPOINT ["dotnet", "OrderService.dll"]

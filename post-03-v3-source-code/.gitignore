@@ -1,0 +1,58 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# .NET user-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Environment and secrets (never commit real keys)
+.env
+.env.local
+.env.*.local
+!/.env.example
+!/.env.production.example
+**/appsettings.Development.json
+**/appsettings.Local.json
+secrets.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and diagnostics
+*.log
+logs/
+*.diag
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Aspire / DCP temp state
+.aspire/
+**/.aspire/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Editor backups
+*~
+*.swp
+*.bak
