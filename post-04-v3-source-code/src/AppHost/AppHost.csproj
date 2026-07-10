@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>aspire-post-01-dev-sandbox</UserSecretsId>
+    <LaunchProfile>http</LaunchProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.2" />
+    <ProjectReference Include="..\UserService\UserService.csproj" />
+    <ProjectReference Include="..\OrderService\OrderService.csproj" />
+  </ItemGroup>
+</Project>
