@@ -1,0 +1,5 @@
+{
+  "ApplicationInsights": {
+    "ConnectionString": "InstrumentationKey=<your-key>;IngestionEndpoint=https://<region>.in.applicationinsights.azure.com/"
+  }
+}

@@ -1,0 +1,65 @@
+# config/otel-collector-config.yaml
+# CUMULATIVE — Post 3 adds batch processor and memory_limiter.
+# Post 1: OTLP receiver + logging exporter
+# Post 2: No config changes
+# Post 3: batch processor + memory_limiter processor NEW
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317   # gRPC — use in production and .NET Aspire
+      http:
+        endpoint: 0.0.0.0:4318   # HTTP — use for debugging with curl/Invoke-RestMethod
+
+processors:
+  # POST 3: memory_limiter — prevents OTel Collector from consuming unbounded memory
+  # during traffic spikes. Must be the FIRST processor in every pipeline.
+  # If heap exceeds limit_mib, the Collector starts dropping data rather than OOMing.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 200         # hard limit: drop data above this
+    spike_limit_mib: 50    # soft limit: start GC above this
+
+  # POST 3: batch processor — groups records into batches before exporting.
+  # Dramatically reduces export calls and network overhead.
+  # timeout: how long to wait before sending an incomplete batch.
+  # send_batch_size: send when this many records accumulate.
+  batch:
+    timeout: 1s
+    send_batch_size: 512
+
+exporters:
+  # Post 1: logging exporter — writes records to collector stdout for local verification
+  logging:
+    verbosity: detailed
+
+  # Post 3: debug exporter — structured JSON output, easier to grep than logging
+  debug:
+    verbosity: basic
+
+extensions:
+  # Post 3: zPages — HTTP debug interface for inspecting pipeline health
+  # Access at: http://localhost:55679/debug/pipelinez
+  # Shows: accepted/refused/dropped counts per pipeline per minute
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check, zpages]
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]   # memory_limiter always first
+      exporters:  [logging]
+    metrics:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [logging]
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [logging, debug]
