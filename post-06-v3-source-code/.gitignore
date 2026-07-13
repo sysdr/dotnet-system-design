@@ -1,0 +1,23 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+
+# Local environment (use .env.example as template)
+.env
+
+# IDE / OS
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+.DS_Store
+
+# Test / coverage
+TestResults/
+*.trx
+coverage/
+
+# Aspire / local runtime junk
+.aspire/
+**/launchSettings.user.json
