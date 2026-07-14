@@ -1,0 +1,26 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+
+# Local secrets / env (never push)
+.env
+.env.*
+!.env.example
+**/secrets.json
+**/appsettings.*.local.json
+**/secrets.endpoints.json
+
+# IDE / OS
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+Thumbs.db
+.DS_Store
+
+# Test / publish artifacts
+TestResults/
+artifacts/
+publish/
+*.log

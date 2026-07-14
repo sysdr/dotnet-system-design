@@ -1,0 +1,16 @@
+{
+  "UserConfig": {
+    "Namespaces": [{
+      "Name": "hyperscale-local",
+      "Queues": [{
+        "Name": "orders",
+        "Properties": {
+          "MaxDeliveryCount": 3,
+          "DeadLetteringOnMessageExpiration": true,
+          "LockDuration": "PT30S",
+          "DefaultMessageTimeToLive": "P14D"
+        }
+      }]
+    }]
+  }
+}
